@@ -1,0 +1,1 @@
+CREATE DATABASE auth OWNER root;

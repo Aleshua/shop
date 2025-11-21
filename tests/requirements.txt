@@ -2,3 +2,4 @@ pytest
 requests
 psycopg2-binary
 factory_boy
+python-dotenv

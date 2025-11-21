@@ -1,0 +1,19 @@
+package repositories
+
+import (
+	"context"
+
+	d "auth/internal/domain"
+)
+
+//go:generate go run ../../../../shared/generators/logging-decorator -file=i-session.go -interface=ISessionRepository -output=../decorators/session-repo-logging.go
+type ISessionRepository interface {
+	// Находит сессию по хешу токена.
+	// Если не находит выбрасывает ошибку
+	Find(ctx context.Context, refreshTokenHash string) (d.Session, error)
+
+	// По id обновляет все параметры
+	Update(ctx context.Context, session d.Session) error
+
+	Save(ctx context.Context, session d.Session) error
+}

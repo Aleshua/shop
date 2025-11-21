@@ -1,0 +1,16 @@
+root = "."
+tmp_dir = "tmp"
+
+[build]
+cmd = "go build -o ./tmp/main ./cmd"
+bin = "tmp/main"
+delay = 1000
+poll = true
+poll_interval = 5000
+include_ext = ["go", "env"]
+
+[log]
+time = true
+
+[watch]
+paths = ["cmd", "internal"]

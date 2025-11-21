@@ -1,0 +1,56 @@
+services:
+  gateway:
+    container_name: shop_gateway_service
+    build:
+      context: .
+      dockerfile: ./services/gateway/deploy/Dockerfile
+      target: dev
+    volumes:
+      - ./go.work:/workspace/go.work
+      - ./go.work.sum:/workspace/go.work.sum
+      - ./shared:/workspace/shared
+      - ./services/gateway:/workspace/services/gateway
+    ports:
+      - "${GATEWAY_EXTERNAL_PORT}:80"
+    env_file:
+      - ./services/gateway/.env
+    depends_on:
+      - auth-service
+    restart: no
+
+  auth-service:
+    container_name: shop_auth_service
+    build:
+      context: .
+      dockerfile: ./services/auth-service/deploy/Dockerfile
+      target: dev
+    volumes:
+      - ./go.work:/workspace/go.work
+      - ./go.work.sum:/workspace/go.work.sum
+      - ./shared:/workspace/shared
+      - ./services/auth-service:/workspace/services/auth-service
+    ports:
+      - "${AUTH_EXTERNAL_PORT}:8080"
+    env_file:
+      - ./services/auth-service/.env
+    depends_on:
+      - database
+    restart: no
+
+  database:
+    image: postgres:latest
+    container_name: shop_database
+    environment:
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+    ports:
+      - "${DATABASE_EXTERNAL_PORT}:5432"
+    volumes:
+      - ./init-db:/docker-entrypoint-initdb.d/
+      - pgdata:/var/lib/postgresql/data/pgdata
+    restart: no
+
+
+volumes:
+  pgdata:
+    driver: local

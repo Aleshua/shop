@@ -1,0 +1,48 @@
+package services
+
+import (
+	"context"
+	"fmt"
+	"net/smtp"
+
+	"auth/internal/config"
+)
+
+type ConfirmEmailCodeSenderService struct {
+	Host           string
+	Port           int
+	Username       string
+	Password       string
+	From           string
+	SkipAuthAndTLS bool
+}
+
+func NewConfirmEmailCodeSenderService(params config.Email) *ConfirmEmailCodeSenderService {
+	return &ConfirmEmailCodeSenderService{
+		Host:           params.Host,
+		Port:           params.Port,
+		Username:       params.Username,
+		Password:       params.Password,
+		From:           params.From,
+		SkipAuthAndTLS: params.SkipAuthAndTLS,
+	}
+}
+
+func (s *ConfirmEmailCodeSenderService) Send(ctx context.Context, to string, body string) error {
+	auth := smtp.PlainAuth("", s.Username, s.Password, s.Host)
+	addr := fmt.Sprintf("%s:%d", s.Host, s.Port)
+
+	msg := []byte(
+		fmt.Sprintf("From: %s\r\nTo: %s\r\nSubject: Код подтверждения\r\n\r\nВаш код подтверждения: %s",
+			s.From,
+			to,
+			body,
+		),
+	)
+
+	if s.SkipAuthAndTLS {
+		return smtp.SendMail(addr, nil, s.From, []string{to}, msg)
+	}
+
+	return smtp.SendMail(addr, auth, s.From, []string{to}, msg)
+}
